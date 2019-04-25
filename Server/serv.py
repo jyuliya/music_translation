@@ -49,6 +49,9 @@ def process_midi(file, style, track_id):
         db.session.add(track)
         db.session.commit()
         proc(file)
+        track.status = "Ready"
+        db.session.add(track)
+        db.session.commit()
 
 
 @api.route("/genres")
