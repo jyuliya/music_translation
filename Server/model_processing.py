@@ -20,9 +20,7 @@ def get_msg(file):
         if not parts: 
             print("NOT PARTS")
             notes_to_parse = midi.flat.notes
-        prev_offset = 0
-        for elem in parts:
-            notes_to_parse = elem.recurse()
+            prev_offset = 0
             for element in notes_to_parse:
                 new_offset = 0.5
                 if prev_offset == element.offset:
@@ -39,15 +37,40 @@ def get_msg(file):
                     if 1.5 < new_offset:
                         new_offset = 2
                 if isinstance(element, note.Note):
-                    notes.append(str(element.pitch) + "|" + str(new_offset) + "|" + str(element.octave) 
-                    + "|" + str(elem[0]) )
+                    notes.append(str(element.pitch) + "|" + str(new_offset) + "|" + str(element.octave))
                     n += 1
                 elif isinstance(element, chord.Chord):
-                    notes.append('.'.join(str(n) for n in element.normalOrder) + "|" + str(new_offset)
-                                 + "|" + str(elem[0]))
+                    notes.append('.'.join(str(n) for n in element.normalOrder) + "|" + str(new_offset))
                     n += 1
+        else:
+            prev_offset = 0
+            for elem in parts:
+                notes_to_parse = elem.recurse()
+                for element in notes_to_parse:
+                    new_offset = 0.5
+                    if prev_offset == element.offset:
+                        new_offset = 0
+                    else:
+                        new_offset = element.offset - prev_offset
+                        if 0 < new_offset <= 0.5:
+                            new_offset = 0.5
+                        if 0.5 < new_offset <= 1:
+                            new_offset = 1
 
-                prev_offset = element.offset
+                        if 1 < new_offset <= 1.5:
+                            new_offset = 1.5
+                        if 1.5 < new_offset:
+                            new_offset = 2
+                    if isinstance(element, note.Note):
+                        notes.append(str(element.pitch) + "|" + str(new_offset) + "|" + str(element.octave) 
+                        + "|" + str(elem[0]) )
+                        n += 1
+                    elif isinstance(element, chord.Chord):
+                        notes.append('.'.join(str(n) for n in element.normalOrder) + "|" + str(new_offset)
+                                     + "|" + str(elem[0]))
+                        n += 1
+
+                    prev_offset = element.offset
     except Exception as e:
         print("Что - то не так: ", e)
     return notes
